@@ -2,6 +2,32 @@
 
 这一组 skills 面向本机电脑管理、维护与自动化。它们用于先诊断、再给出最小可回滚操作，避免在没有证据和确认的情况下修改系统设置、删除文件、终止进程或安装常驻服务。
 
+## Installation
+
+Install all skills:
+
+```bash
+npx skills add VintLin/computer-care-skills
+```
+
+List available skills before installing:
+
+```bash
+npx skills add VintLin/computer-care-skills --list
+```
+
+Install one skill:
+
+```bash
+npx skills add VintLin/computer-care-skills --skill optimize-network
+```
+
+This repository is public and can be discovered by the Skills CLI from GitHub:
+
+```text
+https://github.com/VintLin/computer-care-skills
+```
+
 ## 用途
 
 适合放入这里的 skill 应该满足两个条件：
@@ -35,6 +61,12 @@
 | `macos-configure-workstation` | macOS 工作站稳定性 | 常插电、睡眠唤醒、USB/音频设备掉线、电池健康 |
 | `monitor-processes` | 后台进程与长任务监控 | 长命令、脚本、服务、构建任务的心跳、日志和超时 |
 | `watch-files` | 文件变化监听自动化 | 目录监听、变更触发命令、重启服务、通知前置设计 |
+
+## Publishing on skills.sh
+
+`skills.sh` discovers public GitHub repositories through the Skills CLI. A user can install this repository with `npx skills add VintLin/computer-care-skills`; anonymous install telemetry may then make the skills appear on `skills.sh` pages and leaderboards.
+
+Each skill is defined by its own `SKILL.md` file under `skills/<name>/`. Helper scripts and references stay next to the skill that owns them.
 
 ## 使用原则
 
@@ -80,3 +112,7 @@
 - 主 `SKILL.md` 保持轻量；长参考、脚本和模板放入 `references/`、`scripts/` 或 `templates/`。
 - 不把能力描述绑定到特定助手或运行平台；只有工具名本身不可替代时才保留品牌词。
 - 脚本默认只读；如果脚本会修改系统或文件，文件名、说明和正文必须明确标出。
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
