@@ -1,0 +1,4 @@
+interface:
+  display_name: "Optimize Network"
+  short_description: "Diagnose macOS, Windows, or Linux network issues"
+  default_prompt: "Use $optimize-network to diagnose my network and apply safe, reversible optimizations."

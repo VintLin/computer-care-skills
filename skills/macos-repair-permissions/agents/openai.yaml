@@ -1,0 +1,4 @@
+interface:
+  display_name: "macOS Repair Permissions"
+  short_description: "Diagnose Full Disk Access and TCC errors"
+  default_prompt: "Use $macos-repair-permissions to diagnose this macOS permission error and guide a safe fix."

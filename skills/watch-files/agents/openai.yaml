@@ -1,0 +1,4 @@
+interface:
+  display_name: "Watch Files"
+  short_description: "Watch files and trigger safe local automation"
+  default_prompt: "Use $watch-files to design or debug this file-change watcher."

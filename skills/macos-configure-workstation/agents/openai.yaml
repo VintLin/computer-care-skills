@@ -1,0 +1,4 @@
+interface:
+  display_name: "macOS Configure Workstation"
+  short_description: "Tune plugged-in MacBook power and device stability"
+  default_prompt: "Use $macos-configure-workstation to diagnose this macOS workstation setup issue."

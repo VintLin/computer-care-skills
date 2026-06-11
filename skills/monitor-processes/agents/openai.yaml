@@ -1,0 +1,4 @@
+interface:
+  display_name: "Monitor Processes"
+  short_description: "Monitor long-running local processes safely"
+  default_prompt: "Use $monitor-processes to supervise this long-running command with status, logs, heartbeat, and timeout evidence."

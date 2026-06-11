@@ -1,0 +1,4 @@
+interface:
+  display_name: "macOS Clean Storage"
+  short_description: "Audit macOS disk use and reclaim storage safely"
+  default_prompt: "Use $macos-clean-storage to audit disk usage and propose safe cleanup options."
