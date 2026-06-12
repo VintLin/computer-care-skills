@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 from urllib.parse import unquote, urlparse
 
@@ -106,6 +107,37 @@ def open_path(path: str, target: Target, print_command: bool) -> int:
     return 0
 
 
+def list_paths(path: str, include_dirs: bool, dirs_only: bool) -> list[str]:
+    raw = path.strip().strip('"').strip("'")
+
+    if include_dirs and dirs_only:
+        raise ValueError("--include-dirs and --dirs-only cannot be used together")
+    if raw.startswith("smb://"):
+        raise ValueError("Mount the SMB share first, then list its /Volumes/... path")
+    if raw.startswith("\\\\") or raw.startswith("\\"):
+        raise ValueError("Mount the UNC share first, then list its local mounted path")
+    if re.match(r"^[A-Za-z]:[\\/]", raw):
+        raise ValueError("Windows drive paths cannot be listed from this host")
+
+    target = Path(raw).expanduser()
+    if not target.exists():
+        raise ValueError(f"Path does not exist: {path}")
+
+    if target.is_file():
+        return [] if dirs_only else [str(target.absolute())]
+    if not target.is_dir():
+        raise ValueError(f"Path is not a file or directory: {path}")
+
+    results: list[str] = []
+    for child in sorted(target.rglob("*")):
+        if child.is_dir():
+            if include_dirs or dirs_only:
+                results.append(str(child.absolute()))
+        elif not dirs_only:
+            results.append(str(child.absolute()))
+    return results
+
+
 def shell_command(command: list[str]) -> str:
     if command[0] == "explorer":
         return "explorer " + command[1]
@@ -131,6 +163,11 @@ def main(argv: list[str]) -> int:
     open_parser.add_argument("--print-command", action="store_true")
     open_parser.add_argument("path")
 
+    list_parser = subparsers.add_parser("list")
+    list_parser.add_argument("--include-dirs", action="store_true")
+    list_parser.add_argument("--dirs-only", action="store_true")
+    list_parser.add_argument("path")
+
     args = parser.parse_args(argv)
 
     try:
@@ -139,6 +176,10 @@ def main(argv: list[str]) -> int:
             return 0
         if args.command == "open":
             return open_path(args.path, args.to, args.print_command)
+        if args.command == "list":
+            for listed_path in list_paths(args.path, args.include_dirs, args.dirs_only):
+                print(listed_path)
+            return 0
     except (ValueError, subprocess.CalledProcessError) as exc:
         print(str(exc), file=sys.stderr)
         return 1

@@ -1,6 +1,6 @@
 ---
 name: manage-paths
-description: Use when a user sends a Windows path, UNC network path, macOS path, smb:// URL, /Volumes path, mounted share path, or asks to convert, normalize, quote, inspect, or open a file-system path across Windows and macOS.
+description: Use when a user sends a Windows path, UNC network path, macOS path, smb:// URL, /Volumes path, mounted share path, or asks to convert, normalize, quote, inspect, list, or open a file-system path across Windows and macOS.
 ---
 
 # Manage Paths
@@ -19,6 +19,7 @@ Use for:
 - macOS mounted volumes: `/Volumes/share/folder`
 - macOS local paths: `/Users/name/folder`
 - Requests to open a path, produce a safe command, or convert between Windows and macOS forms
+- Requests to list files under a local path or mounted share
 
 Do not use for URL routing, shell glob expansion, application-specific import paths, or business-specific folder rewrites unless the user provides the mapping rule.
 
@@ -37,6 +38,11 @@ Do not use for URL routing, shell glob expansion, application-specific import pa
    - On macOS, open with Finder using `open <path-or-smb-url>`.
    - On Windows, open with File Explorer using `explorer <path>`.
    - If the current environment is not the target OS, return the command the user should run instead of pretending it was opened.
+6. When the user asks to list files:
+   - List only files by default.
+   - Use `--include-dirs` only when the user wants directories shown with files.
+   - Use `--dirs-only` only when the user wants directories without files.
+   - For `smb://` or UNC paths, list only after the share is mounted locally; otherwise explain the mount requirement.
 
 ## Quick Reference
 
@@ -49,16 +55,19 @@ Do not use for URL routing, shell glob expansion, application-specific import pa
 
 ## Tool
 
-Use `scripts/path_tool.py` for deterministic conversion and opening:
+Use `scripts/path_tool.py` for deterministic conversion, opening, and listing:
 
 ```bash
 python3 /path/to/manage-paths/scripts/path_tool.py convert --to mac '\\server\share\folder'
 python3 /path/to/manage-paths/scripts/path_tool.py convert --to windows 'smb://server/share/folder'
 python3 /path/to/manage-paths/scripts/path_tool.py open --to mac '\\server\share\folder'
 python3 /path/to/manage-paths/scripts/path_tool.py open --to windows 'smb://server/share/folder' --print-command
+python3 /path/to/manage-paths/scripts/path_tool.py list '/Volumes/share/folder'
+python3 /path/to/manage-paths/scripts/path_tool.py list --include-dirs '/Volumes/share/folder'
+python3 /path/to/manage-paths/scripts/path_tool.py list --dirs-only '/Volumes/share/folder'
 ```
 
-The script prints the converted path. `open` also opens it when the host OS supports the requested file manager.
+The script prints the converted path. `open` also opens it when the host OS supports the requested file manager. `list` prints one absolute path per line and preserves visible path components without resolving symlinks.
 
 ## Response Style
 
@@ -66,11 +75,14 @@ For a simple conversion, answer with only the converted path unless the user ask
 
 For open requests, state whether it was opened or provide the exact command to run.
 
+For list requests, return the matching paths or summarize where the full list was written if the output is too long.
+
 If a path appears to require a business-specific rewrite, ask for the rule or say that only syntax conversion can be done safely.
 
 ## Common Mistakes
 
 - Do not treat a Windows drive path as a real macOS mount unless the user confirms the mount layout.
 - Do not infer a server name from `/Volumes/share`; it only contains the mounted share name.
+- Do not claim `smb://` or UNC contents were listed before the share is mounted locally.
 - Do not silently decode, rename, or translate folder names except for URL percent-decoding in `smb://` paths.
 - Do not claim a path was opened when running on the wrong operating system; provide the command instead.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Manage Paths"
-  short_description: "Convert, quote, and open Windows or Mac paths"
-  default_prompt: "Use $manage-paths to convert this Windows or Mac path and provide the correct open command when needed."
+  short_description: "Convert, quote, open, and list Windows or Mac paths"
+  default_prompt: "Use $manage-paths to convert, list, or open this Windows or Mac path and provide the correct command when needed."
