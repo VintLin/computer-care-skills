@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Storage"
+  short_description: "Audit macOS or Windows disk use safely"
+  default_prompt: "Use $clean-storage to audit disk usage and propose safe cleanup options."
