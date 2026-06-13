@@ -5,6 +5,7 @@
 - Renamed `macos-clean-storage` to `clean-storage`.
 - Added Windows storage cleanup guidance alongside macOS cleanup guidance.
 - Moved platform-specific cleanup commands into `clean-storage` references.
+- Added Linux storage cleanup guidance and Linux cache audit coverage.
 
 ## v0.0.2 - 2026-06-11
 

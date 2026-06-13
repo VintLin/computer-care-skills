@@ -1,6 +1,6 @@
 ---
 name: clean-storage
-description: Use when a user asks about low disk space, storage cleanup, cache pruning, Downloads triage, forgotten large files, developer cache size, Docker/WSL bloat, package-manager caches, Windows Update cleanup, or safe ways to reclaim disk space on macOS or Windows.
+description: Use when a user asks about low disk space, storage cleanup, cache pruning, Downloads triage, forgotten large files, developer cache size, Docker/Podman/WSL bloat, package-manager caches, Windows Update cleanup, Linux journal/snapshot cleanup, or safe ways to reclaim disk space on macOS, Windows, or Linux.
 ---
 
 # Clean Storage
@@ -18,6 +18,7 @@ Do not turn a storage cleanup request into a blind delete task. Treat user files
 3. Read the platform reference that matches the machine:
    - macOS: `references/macos.md`
    - Windows: `references/windows.md`
+   - Linux: `references/linux.md`
 4. Group candidates by risk:
    - Low: re-downloadable caches and tool-managed temporary data.
    - Medium: installers, disk images, archives, exports, logs, old downloads.
@@ -33,7 +34,9 @@ Use macOS guidance for Darwin hosts, Apple laptops/desktops, `/Users`, `~/Librar
 
 Use Windows guidance for Windows 10/11, `C:\`, PowerShell, Storage Sense, Disk Cleanup, DISM component store cleanup, WSL2, WinGet, Scoop, Chocolatey, and Docker Desktop on Windows.
 
-If the user provides paths from both systems, first determine where the cleanup will run. Do not apply Windows deletion commands to mounted macOS paths or macOS shell commands to WSL/PowerShell paths.
+Use Linux guidance for Linux servers, desktops, NAS hosts, `/home`, `/var`, `/boot`, systemd journal, APT/DNF/Zypper/Pacman/APK, Flatpak, Snap, Docker, Podman, Btrfs, Snapper, Timeshift, and Linux developer caches.
+
+If the user provides paths from multiple systems, first determine where the cleanup will run. Do not apply Windows deletion commands to mounted macOS paths, macOS shell commands to WSL/PowerShell paths, or Linux package-manager/container commands to Windows or macOS host storage unless the target is explicitly a Linux environment.
 
 ## Reporting Format
 
@@ -66,4 +69,5 @@ For each meaningful decision, include:
 - Do not use broad recursive deletion on `AppData`, `Library`, `ProgramData`, `Windows`, project roots, or application support directories.
 - Do not manually delete system internals when an OS cleanup tool exists.
 - Do not prune Docker volumes, unregister WSL distros, remove toolchains, or delete model caches without explicit user approval.
+- Do not manually delete Linux package databases, `/var/lib/*` state, `/boot` kernels, Docker/Podman storage internals, or Btrfs/Snapper/Timeshift snapshots.
 - Do not stop after changing scripts or commands; re-read generated reports or command output and verify counts, sizes, and before/after free space.
