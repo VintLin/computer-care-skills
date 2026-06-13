@@ -18,12 +18,25 @@ netstat -rn -f inet6
 netstat -ib
 netstat -s
 system_profiler SPAirPortDataType
-networkQuality -v
+networkQuality -c
 lsof -nP -iTCP -sTCP:LISTEN
 ps -axo pid,ppid,pcpu,pmem,comm,args
 ```
 
-Prefer `networkQuality -v` for a built-in baseline. Use `speedtest-cli` only as a secondary data point because it may choose poor servers through VPN.
+Prefer `networkQuality -c` for a built-in structured baseline. It reports responsiveness, idle latency, throughput, interface, and latency-under-load fields in JSON. Use `speedtest-cli` only as a secondary data point because it may choose poor servers through VPN.
+
+Useful focused variants:
+
+```bash
+networkQuality -s -c
+networkQuality -I en0 -c
+networkQuality -f h2 -c
+networkQuality -f h3 -c
+networkQuality -f L4S -c
+networkQuality -f noL4S -c
+```
+
+Use `-s` when upload and download responsiveness need to be separated. Use `-I` only after identifying the interface. Use `-f` protocol flags only for a focused comparison; do not run protocol matrices as a default first pass.
 
 Identify the Wi-Fi device before using device-specific commands. It is often `en0`, but not always:
 
@@ -91,6 +104,8 @@ networksetup -setMTU Wi-Fi 1500
 
 Prefer VPN/router MTU or MSS clamp when available because a system interface MTU affects all traffic.
 
+For UDP, QUIC, IPv6, VPN, or black-hole symptoms, read `references/pmtu-mtu.md` before recommending an MTU change.
+
 ## IPv4 and IPv6
 
 Compare both families before disabling IPv6:
@@ -102,7 +117,7 @@ curl -4 -L -o /dev/null -sS -w '%{remote_ip} %{time_total}\n' https://www.apple.
 curl -6 -L -o /dev/null -sS -w '%{remote_ip} %{time_total}\n' https://www.apple.com
 ```
 
-If IPv6 is worse, first inspect DNS answers, route, PMTU, VPN handling, and CDN selection. Do not recommend global IPv6 disablement as a first-line fix.
+If IPv6 is worse, first inspect DNS answers, Happy Eyeballs behavior, route, PMTU, VPN handling, firewall, and CDN selection. Do not recommend global IPv6 disablement as a first-line fix.
 
 ## Wi-Fi
 

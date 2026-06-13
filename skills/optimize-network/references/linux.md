@@ -53,7 +53,7 @@ curl -4 -L -o /dev/null -sS -w '%{remote_ip} %{time_total}\n' https://example.co
 curl -6 -L -o /dev/null -sS -w '%{remote_ip} %{time_total}\n' https://example.com
 ```
 
-Do not disable IPv6 globally as a first-line fix. First decide whether the failure is DNS answer quality, route, PMTU, firewall, VPN, or CDN mapping.
+Do not disable IPv6 globally as a first-line fix. First decide whether the failure is Happy Eyeballs behavior, DNS answer quality, route, PMTU, firewall, VPN, or CDN mapping.
 
 ## Wi-Fi
 
@@ -77,6 +77,8 @@ ping -M do -s 1464 -c 4 1.1.1.1
 ```
 
 `ip link set ... mtu` is a real interface change. Treat it as local configuration requiring evidence and rollback.
+
+For UDP, QUIC, IPv6, VPN, or black-hole symptoms, read `references/pmtu-mtu.md` before recommending an MTU change. Prefer VPN/router MSS or MTU controls when the failing path is scoped to a tunnel.
 
 ## NIC and TCP
 

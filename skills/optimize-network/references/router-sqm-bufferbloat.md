@@ -12,12 +12,21 @@ Compare idle latency to loaded latency:
 - Ping during a large upload.
 - Ping during a large download.
 - Built-in responsiveness tests such as macOS `networkQuality` when available.
+- Directional tests when possible: upload-loaded latency and download-loaded latency often point to different queues.
+- Protocol comparisons when relevant: HTTP/2 vs HTTP/3, required VPN/TUN path vs in-app node/mode variations, and L4S vs noL4S on macOS when supported.
 
 Symptoms:
 
 - Upload makes the whole network slow: upstream queueing.
 - Download makes all clients lag: downstream queueing or ISP/router bufferbloat.
 - VPN makes loaded latency worse: VPN exit or local TUN/proxy queueing.
+
+## Measurement Rules
+
+- Record idle latency, loaded latency, throughput, interface, router/VPN state, and whether upload/download ran in parallel or sequentially.
+- On macOS, `networkQuality -c` provides JSON fields such as `base_rtt`, `responsiveness`, throughput, and latency-under-load values. Use `networkQuality -s -c` when separate upload/download responsiveness matters.
+- Do not run multiple bandwidth tests at the same time unless intentionally testing contention.
+- Do not treat a high throughput score as healthy if calls, games, SSH, or page loads stall under load.
 
 ## Router-Side Fixes
 

@@ -99,7 +99,11 @@ section "Top Network Processes"
 nettop -P -L 1 -x -J bytes_in,bytes_out 2>/dev/null | head -80 || true
 
 section "Network Quality"
-networkQuality -v 2>/dev/null || true
+if [ "${SKIP_BANDWIDTH:-0}" = "1" ]; then
+  printf 'Skipped because SKIP_BANDWIDTH=1\n'
+else
+  networkQuality -c -M 30 2>/dev/null || networkQuality -v 2>/dev/null || true
+fi
 
 section "TCP Stats"
 netstat -s 2>/dev/null | sed -n '1,160p' || true

@@ -6,6 +6,7 @@
 - Added Windows storage cleanup guidance alongside macOS cleanup guidance.
 - Moved platform-specific cleanup commands into `clean-storage` references.
 - Added Linux storage cleanup guidance and Linux cache audit coverage.
+- Expanded `optimize-network` guidance for loaded latency, PMTU/MTU, Happy Eyeballs, DoH, HTTPS/SVCB diagnostics, symptom routing, before/after reporting, and preserving always-on VPN/proxy apps during diagnosis.
 
 ## v0.0.2 - 2026-06-11
 

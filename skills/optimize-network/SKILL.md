@@ -7,17 +7,18 @@ description: Use when a user reports slow internet, unstable latency, packet los
 
 ## Overview
 
-Prefer reversible, minimal changes. Start with read-only diagnosis, then explain each meaningful decision with conclusion, reason, risk, next step, scope, and validation. Do not disable VPN, delete saved networks, change registry/system services, change TCP/NIC globals, disable IPv6/firewall/security tools, or kill processes unless the user explicitly asks and the impact is clearly bounded.
+Prefer reversible, minimal changes. Start with read-only diagnosis, then explain each meaningful decision with conclusion, reason, risk, next step, scope, and validation. Do not ask the user to pause, quit, or disable Clash/V2Ray/Xray/Mihomo, WireGuard, Tailscale, corporate VPN, or similar always-on VPN/proxy apps as a default diagnostic step; users often rely on them for basic network access. Do not disable VPN, delete saved networks, change registry/system services, change TCP/NIC globals, disable IPv6/firewall/security tools, or kill processes unless the user explicitly asks and the impact is clearly bounded.
 
-Do not optimize from a single speed number. Compare repeated measurements, separate direct/proxy/VPN paths, and avoid running bandwidth tests in parallel unless intentionally testing congestion or loaded latency.
+Do not optimize from a single speed number. Compare repeated measurements, separate direct/proxy/VPN paths when that can be done without breaking the user's required access path, and avoid running bandwidth tests in parallel unless intentionally testing congestion or loaded latency.
 
 ## Workflow
 
 1. Classify the symptom first: web first-load, bulk download, video call, gaming, SSH, Git/npm/pip/Docker, AI API, LAN/NAS, browser-only, terminal-only, VPN-only, or all traffic.
 2. Identify OS, active interface, default route, DNS, proxy/PAC, VPN/TUN state, IPv4/IPv6 state, browser path, and available tools.
-3. Run a read-only baseline: bandwidth, idle latency, loaded latency, DNS resolution and answer quality, packet loss, MTU/path-MTU, Wi-Fi/Ethernet link quality, curl timing, route/path, and active bandwidth consumers.
+3. Run a read-only baseline: responsiveness and loaded latency, bandwidth, DNS transport and answer quality, packet loss, MTU/path-MTU, Wi-Fi/Ethernet link quality, curl timing, route/path, and active bandwidth consumers.
 4. Compare paths when relevant:
-   - direct vs system proxy vs explicit proxy vs VPN/TUN
+   - required VPN/TUN path vs in-app node/mode/rule variations
+   - direct or no-proxy only when it does not break required access, or when the user explicitly asks for that comparison
    - IPv4 vs IPv6
    - browser vs curl/terminal
    - idle vs loaded network
@@ -42,9 +43,23 @@ Read only the relevant reference:
 - Linux: `references/linux.md`
 - Browser/app layer: `references/browser-app-layer.md`
 - DNS, DoH, and split DNS: `references/dns-doh-splitdns.md`
+- PMTU and MTU: `references/pmtu-mtu.md`
 - TCP and NIC diagnosis: `references/tcp-nic.md`
 - Router SQM and bufferbloat: `references/router-sqm-bufferbloat.md`
 - VPN/proxy overlap: `references/vpn-proxy.md`
+
+Use this routing table when the symptom already points to a specific layer:
+
+| Symptom | Read first |
+| --- | --- |
+| Calls, games, SSH, or page loads stall during upload/download | `references/router-sqm-bufferbloat.md`, `references/common-baseline.md` |
+| HTTP/3/QUIC, voice/video, game UDP, or VPN UDP works poorly while TCP works | `references/pmtu-mtu.md`, `references/browser-app-layer.md`, `references/vpn-proxy.md` |
+| Browser is slow but curl/terminal is normal | `references/browser-app-layer.md`, `references/dns-doh-splitdns.md` |
+| Terminal tools are slow but browser is normal | `references/browser-app-layer.md`, `references/vpn-proxy.md`, platform reference |
+| Internal or corporate domains fail | `references/dns-doh-splitdns.md`, `references/vpn-proxy.md`, platform reference |
+| IPv4 and IPv6 differ | `references/dns-doh-splitdns.md`, `references/pmtu-mtu.md`, platform reference |
+| Ethernet negotiates low speed or adapter errors increase | `references/tcp-nic.md`, platform reference |
+| WSL, Docker, registries, npm, pip, or Git are slow while host browsing is normal | `references/vpn-proxy.md`, `references/dns-doh-splitdns.md`, platform reference |
 
 Use scripts as read-only diagnostic helpers:
 
@@ -54,18 +69,21 @@ Use scripts as read-only diagnostic helpers:
 
 Scripts are intentionally read-only. They collect state and do not change DNS, MTU, proxy, routes, VPN, firewall, TCP, or NIC settings.
 
+`scripts/macos_network_snapshot.sh` runs `networkQuality` by default, which uses Internet data. Set `SKIP_BANDWIDTH=1` to skip that section when data usage, metered links, or active calls matter.
+
 ## Decision Heuristics
 
-- If idle latency is normal but latency spikes during upload/download, classify as loaded-latency or bufferbloat before changing DNS.
+- Treat loaded latency/responsiveness as a first-class metric, not a footnote to bandwidth. If idle latency is normal but latency spikes during upload/download, classify loaded-latency or bufferbloat before changing DNS.
 - If DNS query time is fast but TCP, TLS, TTFB, or total HTTP time is high, do not over-optimize DNS.
-- If DNS is fast but CDN IP or TTFB is poor, compare A, AAAA, HTTPS/SVCB answers and curl `remote_ip` across resolvers.
-- If IPv4 and IPv6 behave differently, treat it as dual-stack routing, DNS, PMTU, VPN, or CDN behavior before disabling IPv6 globally.
+- If DNS is fast but CDN IP or TTFB is poor, compare A, AAAA, HTTPS/SVCB answers, browser Secure DNS state, and curl `remote_ip` across resolvers.
+- If IPv4 and IPv6 behave differently, treat it as Happy Eyeballs, dual-stack routing, DNS answer quality, PMTU, VPN/TUN, firewall, or CDN behavior before disabling IPv6 globally.
+- If HTTP/3/QUIC, VPN, or UDP-heavy apps fail while TCP works, investigate PMTU/UDP/QUIC behavior before lowering global interface MTU.
 - If browser and curl disagree, inspect browser Secure DNS/DoH, HTTP/3/QUIC, extensions, NetLog/HAR, cache, certificate interception, and proxy rules.
 - If terminal tools are slow but browser is fast, inspect shell proxy variables, WinHTTP, WSL/Docker DNS, CLI CA certificates, and `NO_PROXY`.
 - If Wi-Fi RSSI is strong but throughput is low, inspect channel width, band, MCS/NSS, BSSID roaming, AP backhaul, WPA mode, and driver.
 - If Ethernet negotiates below expected speed, inspect cable, switch port, duplex, EEE, driver, and error counters.
 - If adapter errors/drops increase during tests, prioritize NIC/driver/offload/queue diagnosis over DNS or VPN changes.
-- If VPN/TUN is active, run separate direct, system-proxy, explicit-proxy, TUN, and browser tests before interpreting speedtest results.
+- If VPN/TUN is active, preserve the required VPN app and compare safe in-app variations first: node, policy/rule mode, TUN vs system proxy ownership when both remain available, DNS mode, UDP/QUIC setting, and browser path. Do not tell the user to pause or quit the VPN app unless they explicitly ask for a direct-access experiment.
 - If system DNS is fully overridden by VPN or browser DoH, changing OS DNS may not affect the observed application.
 - If MTR/traceroute shows loss on a single intermediate hop but later hops and the destination are clean, treat it as likely ICMP rate limiting.
 - If WSL or Docker is slow while the host is normal, inspect virtualization networking, DNS tunneling, auto proxy, container DNS, registry mirror, and VPN compatibility.
@@ -87,7 +105,7 @@ Do not recommend these as first-line fixes:
 - Disable firewall or security/EDR tools globally.
 - Change TCP global parameters without workload evidence.
 - Change NIC offload, ring, coalescing, or power settings without packet/error evidence.
-- Replace VPN or corporate DNS before checking split DNS.
+- Replace, pause, or disable VPN/proxy apps or corporate DNS before checking split DNS and safe in-app alternatives.
 - Force public DNS on corporate networks.
 - Delete Wi-Fi profiles without listing them.
 - Enable both router SQM and hardware flow offloading as a universal optimization.
@@ -113,4 +131,25 @@ For each meaningful decision, report:
 - Next step
 - Scope and validation method when changing settings
 
-Finish with before/after metrics, exact rollback commands where possible, and any residual uncertainty.
+For before/after work, use this structure:
+
+```text
+Baseline:
+- Symptom:
+- Scope: interface / app / VPN path / IPv4 or IPv6 / direct or proxy
+- Key metrics: idle latency, loaded latency or responsiveness, packet loss, DNS answers, remote IP, curl timing, throughput
+
+Action:
+- Change:
+- Why this is the smallest safe change:
+- Risk:
+- Rollback:
+
+After:
+- Same metrics:
+- Improved / unchanged / regressed:
+- Residual uncertainty:
+- Next step:
+```
+
+Finish with exact rollback commands where possible and call out any metric that was not re-measured.

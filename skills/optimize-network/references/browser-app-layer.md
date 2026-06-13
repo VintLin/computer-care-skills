@@ -9,6 +9,7 @@ Read this when a browser, CLI, SaaS app, API client, Git/npm/pip/Docker, or one 
 If browser is slow but curl is fast, inspect:
 
 - Browser Secure DNS/DoH.
+- HTTPS/SVCB records, address hints, and CDN endpoint selection.
 - HTTP/3/QUIC over UDP 443.
 - Proxy extensions, PAC files, or per-browser proxy settings.
 - Cache, service workers, and extensions.
@@ -33,7 +34,9 @@ curl --http2 -L -o /dev/null -sS -w 'http=%{http_version} total=%{time_total} ip
 curl --http3 -L -o /dev/null -sS -w 'http=%{http_version} total=%{time_total} ip=%{remote_ip}\n' https://example.com
 ```
 
-If HTTP/3 is slower or intermittent, inspect VPN, firewall, router QoS/SQM, UDP proxy support, and browser QUIC settings before changing DNS.
+If HTTP/3 is slower or intermittent, inspect VPN, firewall, router QoS/SQM, PMTU, UDP proxy support, and browser QUIC settings before changing DNS.
+
+If HTTPS/SVCB answers advertise HTTP/3, ECH, or alternative endpoints, compare browser behavior with curl carefully. Curl may not use the same DNS path, HTTPS record handling, cache, or Happy Eyeballs policy as the browser.
 
 ## Browser Logs
 

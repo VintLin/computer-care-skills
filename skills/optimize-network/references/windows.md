@@ -101,6 +101,8 @@ Rollback:
 netsh interface ipv4 set subinterface "Wi-Fi" mtu=1500 store=persistent
 ```
 
+For UDP, QUIC, IPv6, VPN, or black-hole symptoms, read `references/pmtu-mtu.md` before recommending an MTU change. Prefer VPN/router MSS or MTU controls when the failing path is scoped to a tunnel.
+
 ## IPv4 and IPv6
 
 Compare both families before disabling IPv6:
@@ -112,7 +114,7 @@ curl.exe -4 -L -o NUL -sS -w "ip=%{remote_ip} total=%{time_total}`n" https://www
 curl.exe -6 -L -o NUL -sS -w "ip=%{remote_ip} total=%{time_total}`n" https://www.microsoft.com
 ```
 
-If IPv6 differs, inspect DNS answers, route, PMTU, VPN handling, firewall, and CDN mapping before disabling IPv6 globally.
+If IPv6 differs, inspect Happy Eyeballs behavior, DNS answers, route, PMTU, VPN handling, firewall, and CDN mapping before disabling IPv6 globally.
 
 ## Wi-Fi
 
