@@ -1,8 +1,8 @@
 interface:
-  display_name: "Keep Codex Fast"
+  display_name: "Codex Clean"
   short_description: "Safe maintenance for Codex local state"
   brand_color: "#22A6A6"
-  default_prompt: "Use $keep-codex-fast when Codex feels slow or bloated, or when local .codex sessions, logs, worktrees, config, or thread metadata need safe cleanup."
+  default_prompt: "Use $codex-clean when Codex feels slow or bloated, or when local .codex sessions, logs, worktrees, config, or thread metadata need safe cleanup."
 
 policy:
   allow_implicit_invocation: true

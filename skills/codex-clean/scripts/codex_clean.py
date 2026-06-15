@@ -538,7 +538,7 @@ def archive_sessions(
     if not apply or not candidates:
         return
 
-    archive_root = codex_home / "archived_sessions" / f"keep-codex-fast-{stamp}"
+    archive_root = codex_home / "archived_sessions" / f"codex-clean-{stamp}"
     manifest = backup_root / "moved-sessions.jsonl"
     archive_root.mkdir(parents=True, exist_ok=True)
     now = int(time.time())
@@ -647,7 +647,7 @@ def move_stale_worktrees(codex_home: Path, backup_root: Path, days: int, stamp: 
     report(f"worktree_candidate_gb {gb(total)}")
     if not apply or not candidates:
         return
-    archive_root = codex_home / "archived_worktrees" / f"keep-codex-fast-{stamp}"
+    archive_root = codex_home / "archived_worktrees" / f"codex-clean-{stamp}"
     manifest = backup_root / "moved-worktrees.jsonl"
     archive_root.mkdir(parents=True, exist_ok=True)
     with manifest.open("w", encoding="utf-8") as handle:
@@ -668,7 +668,7 @@ def rotate_logs(codex_home: Path, threshold_mb: int, stamp: str, apply: bool) ->
         report("logs_rotate skipped_below_threshold")
         return
     if apply and files:
-        archive_root = codex_home / "archived_logs" / f"keep-codex-fast-{stamp}"
+        archive_root = codex_home / "archived_logs" / f"codex-clean-{stamp}"
         archive_root.mkdir(parents=True, exist_ok=True)
         for path in files:
             shutil.move(str(path), str(archive_root / path.name))
@@ -726,7 +726,7 @@ def run(args: argparse.Namespace) -> int:
         return 2
 
     stamp = now_stamp()
-    backup_root = Path(args.backup_root).expanduser() if args.backup_root else documents_backup_root() / f"keep-codex-fast-{stamp}"
+    backup_root = Path(args.backup_root).expanduser() if args.backup_root else documents_backup_root() / f"codex-clean-{stamp}"
     backup_root = backup_root.resolve()
 
     running = codex_processes_running()

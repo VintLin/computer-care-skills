@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke tests for keep-codex-fast using a fake Codex home."""
+"""Smoke tests for codex-clean using a fake Codex home."""
 
 from __future__ import annotations
 
@@ -16,13 +16,13 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "keep_codex_fast.py"
+SCRIPT = ROOT / "scripts" / "codex_clean.py"
 
 
 def load_module():
-    spec = importlib.util.spec_from_file_location("keep_codex_fast", SCRIPT)
+    spec = importlib.util.spec_from_file_location("codex_clean", SCRIPT)
     module = importlib.util.module_from_spec(spec)
-    sys.modules["keep_codex_fast"] = module
+    sys.modules["codex_clean"] = module
     assert spec.loader is not None
     spec.loader.exec_module(module)
     module.codex_processes_running = lambda: []
@@ -41,7 +41,7 @@ def make_fake_home(root: Path) -> dict[str, Path]:
 
     (codex_home / ".codex-global-state.json").write_text('{"pinned-thread-ids":[]}', encoding="utf-8")
     (codex_home / "config.toml").write_text(
-        '[projects."C:\\\\DefinitelyMissingKeepCodexFast"]\ntrust_level = "trusted"\n',
+        '[projects."C:\\\\DefinitelyMissingCodexClean"]\ntrust_level = "trusted"\n',
         encoding="utf-8",
     )
 
@@ -67,7 +67,7 @@ def make_fake_home(root: Path) -> dict[str, Path]:
             long_title,
             long_preview,
             str(rollout),
-            r"\\?\C:\DefinitelyMissingKeepCodexFast",
+            r"\\?\C:\DefinitelyMissingCodexClean",
             int(old_time),
             None,
             0,
@@ -209,13 +209,13 @@ def assert_apply_mode(module) -> None:
         assert archived == 1
         assert archived_at is not None
         assert "archived_sessions" in rollout_path
-        assert cwd == r"C:\DefinitelyMissingKeepCodexFast"
+        assert cwd == r"C:\DefinitelyMissingCodexClean"
         assert len(title) <= 120
         assert len(preview) <= 240
         assert not paths["rollout"].exists()
         assert not paths["worktree"].exists()
         assert not paths["log_file"].exists()
-        assert "DefinitelyMissingKeepCodexFast" not in (paths["codex_home"] / "config.toml").read_text(
+        assert "DefinitelyMissingCodexClean" not in (paths["codex_home"] / "config.toml").read_text(
             encoding="utf-8"
         )
         assert (backup / "restore-sessions.py").exists()

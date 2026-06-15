@@ -47,7 +47,7 @@ npx skills add VintLin/computer-care-skills --skill optimize-network
 | `macos-configure-workstation` | macOS 工作站稳定性 | 长期插电、睡眠唤醒异常、USB/音频设备掉线、显示器睡眠、电池健康 |
 | `monitor-processes` | 长任务监控 | 后台命令、脚本、服务、下载、构建任务的心跳、日志、超时和状态判断 |
 | `watch-files` | 文件变化自动化 | 监听目录、变更后执行命令、重启本地服务、触发备份或通知 |
-| `keep-codex-fast` | Codex 本地状态维护 | Codex 变慢、`.codex` 会话/日志/worktree/config 膨胀、Windows 扩展路径、线程元数据膨胀 |
+| `codex-clean` | Codex 本地状态维护 | Codex 变慢、`.codex` 会话/日志/worktree/config 膨胀、Windows 扩展路径、线程元数据膨胀 |
 | `codex-provider-sync` | Codex provider 元数据同步 | Codex 线程列表缺少未归档记录、`state_5.sqlite` 和 `config.toml` 的 `model_provider` 不一致、JSONL provider 元数据同步 |
 
 ## 使用方式

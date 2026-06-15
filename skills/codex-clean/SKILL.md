@@ -1,11 +1,11 @@
 ---
-name: "keep-codex-fast"
+name: "codex-clean"
 description: "Use when Codex feels slow or bloated, when a codex-clean maintenance pass is needed, or when local .codex sessions, logs, worktrees, config, Windows extended paths, or thread metadata need safe cleanup without losing history."
 metadata:
   short-description: "Safe Codex local-state maintenance"
 ---
 
-# Keep Codex Fast
+# Codex Clean
 
 Use this skill to inspect and safely maintain local Codex state. Preserve continuity first, then reduce local drag.
 
@@ -39,7 +39,7 @@ There are three modes:
 2. Run the bundled script in report mode:
 
 ```bash
-python scripts/keep_codex_fast.py
+python scripts/codex_clean.py
 ```
 
 3. Summarize:
@@ -59,13 +59,13 @@ python scripts/keep_codex_fast.py
 6. If the user wants to apply the recommended maintenance, ask them to close Codex or use `--wait-for-codex-exit`, then run:
 
 ```bash
-python scripts/keep_codex_fast.py --apply --archive-older-than-days 10 --worktree-older-than-days 7
+python scripts/codex_clean.py --apply --archive-older-than-days 10 --worktree-older-than-days 7
 ```
 
 7. Verify after applying:
 
 ```bash
-python scripts/keep_codex_fast.py
+python scripts/codex_clean.py
 ```
 
 8. Ask whether the user wants a recurring report-only reminder:
@@ -77,7 +77,7 @@ If the user wants automation and the Codex app automation tool is available, cre
 
 ## What Apply Does
 
-- Backs up important metadata and `state_5.sqlite` to `~/Documents/Codex/codex-backups/keep-codex-fast-*`.
+- Backs up important metadata and `state_5.sqlite` to `~/Documents/Codex/codex-backups/codex-clean-*`.
 - Archives old non-pinned sessions to `~/.codex/archived_sessions/`.
 - Normalizes Windows extended paths like `\\?\C:\...` inside `state_5.sqlite` text fields.
 - Prunes missing/temp project blocks from `config.toml` and writes UTF-8 without BOM.
@@ -107,7 +107,7 @@ The script reports active thread count, total title/preview characters, maximum 
 Normal apply mode reports metadata-bloat candidates but does not repair them. If the user explicitly opts in, after backups and only when Codex is not running, run:
 
 ```bash
-python scripts/keep_codex_fast.py --apply --repair-thread-metadata-bloat
+python scripts/codex_clean.py --apply --repair-thread-metadata-bloat
 ```
 
 That bounds active `threads.title` and `threads.first_user_message` values. Defaults are 120 characters for titles and 240 characters for previews. It also appends repaired titles to `session_index.jsonl`, matching current upstream name-update storage, so reconciliation/name lookup does not immediately prefer the old full-message fallback.
@@ -168,12 +168,12 @@ We are continuing from this handoff. Read this document first, inspect the curre
 Offer this after the first report/apply/verify cycle:
 
 ```text
-Use $keep-codex-fast to create a recurring Codex maintenance reminder.
+Use $codex-clean to create a recurring Codex maintenance reminder.
 
 Schedule it weekly if I use Codex heavily, or biweekly if that seems safer.
 
 The reminder should:
-- run the keep-codex-fast report first
+- run the codex-clean report first
 - never pass --apply or run mutating maintenance automatically
 - never archive, move, prune, rotate, normalize, delete, or mutate local Codex state
 - remind me to create comprehensive handoff docs and reactivation prompts for active repo chats before any manual apply
