@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Provider Sync"
+  short_description: "Sync local Codex thread provider metadata safely."
+  default_prompt: "Use $codex-provider-sync when Codex thread lists omit unarchived records or local provider metadata needs to be synced to the active provider."
