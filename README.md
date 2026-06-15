@@ -2,6 +2,8 @@
 
 Computer Care Skills 是一组面向本机电脑管理、维护与自动化的 Codex skills。它们适合处理网络、存储、路径、权限、进程、文件监听和 macOS 工作站稳定性等问题。
 
+它们也包含面向 Codex 本地状态维护和线程 provider 元数据同步的技能，帮助你在保留历史连续性的前提下管理长期使用后的本地状态。
+
 这组 skills 的共同原则是：先诊断，再建议；先做只读检查，再执行可回滚的最小变更。涉及删除文件、修改系统设置、终止进程、网络配置或常驻自动化时，默认先说明范围、风险、回滚方式和验证方法。
 
 ## 适用场景
@@ -45,6 +47,8 @@ npx skills add VintLin/computer-care-skills --skill optimize-network
 | `macos-configure-workstation` | macOS 工作站稳定性 | 长期插电、睡眠唤醒异常、USB/音频设备掉线、显示器睡眠、电池健康 |
 | `monitor-processes` | 长任务监控 | 后台命令、脚本、服务、下载、构建任务的心跳、日志、超时和状态判断 |
 | `watch-files` | 文件变化自动化 | 监听目录、变更后执行命令、重启本地服务、触发备份或通知 |
+| `keep-codex-fast` | Codex 本地状态维护 | Codex 变慢、`.codex` 会话/日志/worktree/config 膨胀、Windows 扩展路径、线程元数据膨胀 |
+| `codex-provider-sync` | Codex provider 元数据同步 | Codex 线程列表缺少未归档记录、`state_5.sqlite` 和 `config.toml` 的 `model_provider` 不一致、JSONL provider 元数据同步 |
 
 ## 使用方式
 
