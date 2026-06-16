@@ -12,7 +12,7 @@ Use this workflow to inspect local Codex thread metadata and, after explicit use
 ## Required Workflow
 
 1. Locate the active Codex SQLite database.
-   - Run `node <skill>/scripts/provider_sync.mjs inspect`.
+   - Run `node <skill>/scripts/provider_sync.mjs inspect`, where `<skill>` is the loaded skill directory.
    - Prefer `~/.codex/sqlite/state_5.sqlite` when present.
    - Treat root `~/.codex/state_5.sqlite` as legacy unless inspection proves it is active.
 2. Report the inspection summary to the user.
@@ -26,6 +26,7 @@ Use this workflow to inspect local Codex thread metadata and, after explicit use
 4. On confirmation, run the generated apply command.
    - The script backs up the SQLite DB before writing.
    - The script only rewrites unarchived rows by default.
+   - After writing, verify that SQLite reports the expected `changes()` count.
    - Add `--rewrite-rollouts` only when the user explicitly confirms mutating original `~/.codex/sessions/**/*.jsonl` metadata.
 5. Verify after writing.
    - Re-run `inspect`.
@@ -37,19 +38,19 @@ Use this workflow to inspect local Codex thread metadata and, after explicit use
 Inspect:
 
 ```bash
-node ~/.codex/skills/codex-provider-sync/scripts/provider_sync.mjs inspect
+node <skill>/scripts/provider_sync.mjs inspect
 ```
 
 Apply after user confirmation:
 
 ```bash
-node ~/.codex/skills/codex-provider-sync/scripts/provider_sync.mjs apply --yes
+node <skill>/scripts/provider_sync.mjs apply --yes
 ```
 
 Persistent rewrite after explicit JSONL confirmation:
 
 ```bash
-node ~/.codex/skills/codex-provider-sync/scripts/provider_sync.mjs apply --yes --rewrite-rollouts
+node <skill>/scripts/provider_sync.mjs apply --yes --rewrite-rollouts
 ```
 
 Optional flags:

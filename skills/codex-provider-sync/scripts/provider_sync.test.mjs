@@ -3,7 +3,10 @@ import test from "node:test";
 
 import {
   buildUpdateSql,
+  buildApplyScript,
+  buildCommandArgs,
   defaultDbCandidates,
+  formatNodeCommand,
   parseArgs,
   rewriteSessionMetaLine,
 } from "./provider_sync.mjs";
@@ -38,6 +41,44 @@ test("when building update sql, should target unarchived rows by default", () =>
   assert.equal(
     buildUpdateSql("custom", false),
     "UPDATE threads SET model_provider = 'custom' WHERE archived = 0 AND model_provider != 'custom';",
+  );
+});
+
+test("when building apply script, should execute sqlite statements in one session", () => {
+  const script = buildApplyScript("custom", false);
+
+  assert.match(script, /PRAGMA busy_timeout = 5000;/);
+  assert.match(script, /BEGIN IMMEDIATE;/);
+  assert.match(script, /UPDATE threads SET model_provider = 'custom'/);
+  assert.match(script, /SELECT changes\(\) AS changes;/);
+  assert.match(script, /COMMIT;/);
+});
+
+test("when building apply command args, should preserve inspect scope", () => {
+  const options = parseArgs(["inspect", "--db", "/tmp/custom db.sqlite", "--include-archived"]);
+
+  assert.deepEqual(buildCommandArgs(options, "custom"), [
+    "apply",
+    "--yes",
+    "--to",
+    "custom",
+    "--db",
+    "/tmp/custom db.sqlite",
+    "--include-archived",
+  ]);
+});
+
+test("when formatting node command, should quote paths and values", () => {
+  assert.equal(
+    formatNodeCommand("/tmp/skill path/provider_sync.mjs", [
+      "apply",
+      "--yes",
+      "--to",
+      "custom",
+      "--db",
+      "/tmp/custom db.sqlite",
+    ]),
+    "node '/tmp/skill path/provider_sync.mjs' 'apply' --yes --to 'custom' --db '/tmp/custom db.sqlite'",
   );
 });
 
