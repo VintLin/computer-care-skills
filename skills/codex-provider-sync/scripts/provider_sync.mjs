@@ -77,6 +77,16 @@ export function buildUpdateSql(targetProvider, includeArchived) {
   return `UPDATE threads SET model_provider = '${escapedProvider}' WHERE ${where};`;
 }
 
+export function buildApplyScript(targetProvider, includeArchived) {
+  return [
+    "PRAGMA busy_timeout = 5000;",
+    "BEGIN IMMEDIATE;",
+    buildUpdateSql(targetProvider, includeArchived),
+    "SELECT changes() AS changes;",
+    "COMMIT;",
+  ].join("\n");
+}
+
 export function rewriteSessionMetaLine(line, targetProvider) {
   const lineEnding = line.endsWith("\r\n") ? "\r\n" : line.endsWith("\n") ? "\n" : "";
   const rawLine = lineEnding ? line.slice(0, -lineEnding.length) : line;
@@ -112,6 +122,28 @@ function escapeSqlString(value) {
   return value.replaceAll("'", "''");
 }
 
+function quoteShellArg(value) {
+  return `'${value.replaceAll("'", "'\\''")}'`;
+}
+
+export function buildCommandArgs(options, targetProvider, includeRewriteRollouts = false) {
+  const args = ["apply", "--yes", "--to", targetProvider];
+  if (options.dbPath !== null) {
+    args.push("--db", options.dbPath);
+  }
+  if (options.includeArchived) {
+    args.push("--include-archived");
+  }
+  if (includeRewriteRollouts) {
+    args.push("--rewrite-rollouts");
+  }
+  return args;
+}
+
+export function formatNodeCommand(scriptPath, args) {
+  return ["node", quoteShellArg(scriptPath), ...args.map((arg) => (arg.startsWith("--") ? arg : quoteShellArg(arg)))].join(" ");
+}
+
 function readCurrentProvider(home = homedir()) {
   const configPath = path.join(home, ".codex", "config.toml");
   if (!existsSync(configPath)) {
@@ -141,6 +173,17 @@ function runSqlite(dbPath, args) {
   return result.stdout;
 }
 
+function runSqliteScript(dbPath, script) {
+  const result = spawnSync("sqlite3", [dbPath], {
+    encoding: "utf8",
+    input: script.endsWith("\n") ? script : `${script}\n`,
+  });
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || result.stdout.trim() || "sqlite3 command failed");
+  }
+  return result.stdout;
+}
+
 function queryJson(dbPath, sql) {
   return JSON.parse(runSqlite(dbPath, ["-json", sql]) || "[]");
 }
@@ -154,7 +197,7 @@ function createBackupSet(dbPath) {
   const backupDir = path.join(homedir(), ".codex", "backups", `provider-sync-${timestamp}`);
   mkdirSync(backupDir, { recursive: true });
   const backupPath = path.join(backupDir, path.basename(dbPath));
-  runSqlite(dbPath, [`.backup '${backupPath.replaceAll("'", "''")}'`]);
+  runSqliteScript(dbPath, `.backup '${backupPath.replaceAll("'", "''")}'`);
   return { backupDir, dbBackupPath: backupPath };
 }
 
@@ -262,9 +305,12 @@ function printInspect(result, options) {
   }
   console.log("");
   console.log("Apply command after user confirmation:");
-  console.log(`node ${fileURLToPath(import.meta.url)} apply --yes --to ${result.targetProvider}`);
+  console.log(formatNodeCommand(fileURLToPath(import.meta.url), buildCommandArgs(options, result.targetProvider)));
   console.log("Persistent rollout rewrite command after explicit confirmation:");
-  console.log(`node ${fileURLToPath(import.meta.url)} apply --yes --to ${result.targetProvider} --rewrite-rollouts`);
+  console.log(formatNodeCommand(
+    fileURLToPath(import.meta.url),
+    buildCommandArgs(options, result.targetProvider, true),
+  ));
 }
 
 function printUsage() {
@@ -285,7 +331,17 @@ function main() {
   if (options.command === "apply") {
     const { backupDir, dbBackupPath } = createBackupSet(result.dbPath);
     let rolloutResult = null;
-    runSqlite(result.dbPath, ["PRAGMA busy_timeout = 5000;", buildUpdateSql(result.targetProvider, options.includeArchived)]);
+    const changesOutput = runSqliteScript(
+      result.dbPath,
+      buildApplyScript(result.targetProvider, options.includeArchived),
+    ).trim();
+    const appliedRows = Number.parseInt(changesOutput.split(/\s+/).pop() ?? "", 10);
+    if (!Number.isFinite(appliedRows)) {
+      throw new Error(`Failed to parse sqlite changes() output: ${changesOutput || "(empty)"}`);
+    }
+    if (appliedRows !== result.rowsToChange) {
+      throw new Error(`Expected to change ${result.rowsToChange} rows, but SQLite reported ${appliedRows}.`);
+    }
     if (options.rewriteRollouts) {
       rolloutResult = rewriteRollouts(
         result.dbPath,
@@ -296,6 +352,7 @@ function main() {
     }
     console.log("");
     console.log(`Backup written: ${dbBackupPath}`);
+    console.log(`Rows changed: ${appliedRows}`);
     if (rolloutResult) {
       console.log(`Rollout JSONL scanned: ${rolloutResult.scanned}`);
       console.log(`Rollout JSONL changed: ${rolloutResult.changed.length}`);
