@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagnose Computer"
+  short_description: "Diagnose Mac performance and code speed issues"
+  default_prompt: "Use $diagnose-computer to collect evidence and diagnose this Mac performance issue."

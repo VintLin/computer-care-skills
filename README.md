@@ -9,6 +9,7 @@ Computer Care Skills 是一组面向本机电脑管理、维护与自动化的 C
 ## 适用场景
 
 - 网络变慢、延迟不稳定、DNS 或 VPN/代理冲突。
+- macOS 变慢、内存压力、swap、CPU/温控、磁盘 I/O 或代码运行速度诊断。
 - Windows 与 macOS 路径、UNC、SMB、`/Volumes` 路径转换或打开。
 - macOS、Windows 或 Linux 磁盘空间不足、缓存膨胀、大文件和下载目录整理。
 - macOS 权限、Full Disk Access、TCC、`Operation not permitted` 等访问问题。
@@ -41,6 +42,7 @@ npx skills add VintLin/computer-care-skills --skill optimize-network
 | Skill | 适合处理 | 典型问题 |
 | --- | --- | --- |
 | `optimize-network` | 网络诊断与优化 | 网速慢、延迟高、丢包、DNS 延迟、Wi-Fi/以太网、MTU、VPN、代理、TUN 冲突 |
+| `diagnose-computer` | macOS 性能与代码速度诊断 | Mac 变慢、内存压力、swap、CPU 饱和、温控降频、磁盘 I/O、Rosetta、代码 benchmark/profiler |
 | `manage-paths` | 跨平台路径处理 | Windows UNC、macOS `smb://`、`/Volumes`、本地路径转换、路径打开命令 |
 | `clean-storage` | macOS / Windows / Linux 存储空间清理 | 磁盘不足、缓存审计、Downloads 整理、开发工具缓存、Docker/Podman/WSL 或包管理器占用 |
 | `macos-repair-permissions` | macOS 权限修复 | Full Disk Access、Files and Folders、TCC、沙盒、受保护目录访问失败 |
@@ -66,6 +68,10 @@ npx skills add VintLin/computer-care-skills --skill optimize-network
 
 ```text
 我开着 VPN 时浏览器很慢，但终端 curl 正常，帮我诊断。
+```
+
+```text
+我的 Mac 内存看起来满了，跑代码也变慢，帮我生成诊断包并判断瓶颈。
 ```
 
 ```text
