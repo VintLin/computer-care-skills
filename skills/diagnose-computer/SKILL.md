@@ -1,6 +1,6 @@
 ---
 name: diagnose-computer
-description: Use when a user reports a slow computer, high memory use, swap/pagefile pressure, CPU saturation, thermal throttling, disk I/O pressure, slow code execution, profiler needs, Rosetta/runtime architecture concerns, WSL/Docker resource pressure, or asks for a reproducible diagnostics bundle on macOS or Windows.
+description: Use when a user reports a slow computer, high memory use, swap/pagefile pressure, CPU saturation, thermal throttling, disk I/O pressure, slow code execution, profiler needs, Rosetta/runtime architecture concerns, WSL/Docker/Linux container resource pressure, or asks for a reproducible diagnostics bundle on macOS, Windows, or Linux.
 ---
 
 # Diagnose Computer
@@ -9,13 +9,13 @@ description: Use when a user reports a slow computer, high memory use, swap/page
 
 Diagnose before optimizing. Build a reproducible evidence pack from system pressure, top processes, runtime architecture, workload benchmarks, and profiler output; then choose the smallest reversible action.
 
-Do not treat "free memory" or a task-manager memory percentage as the goal. On macOS, memory pressure, swap growth, compressed memory, wired memory, CPU load, disk I/O, thermal limits, runtime architecture, and code profiler results matter more. On Windows, Available MBytes, commit pressure, Pages Output/sec, pagefile usage, process Private Bytes, Working Set, hard faults, disk I/O, WSL/Docker limits, and profiler results matter more.
+Do not treat "free memory" or a task-manager memory percentage as the goal. On macOS, memory pressure, swap growth, compressed memory, wired memory, CPU load, disk I/O, thermal limits, runtime architecture, and code profiler results matter more. On Windows, Available MBytes, commit pressure, Pages Output/sec, pagefile usage, process Private Bytes, Working Set, hard faults, disk I/O, WSL/Docker limits, and profiler results matter more. On Linux, MemAvailable, swap in/out, major faults, PSI, cgroup limits, process RSS/PSS/USS/VmSwap, disk latency, and profiler results matter more.
 
 ## When to Use
 
 Use for:
 
-- macOS or Windows feels slow, hot, memory-full, swapping/pagefile-heavy, or laggy during development.
+- macOS, Windows, or Linux feels slow, hot, memory-full, swapping/pagefile-heavy, or laggy during development.
 - Code runs slowly and the user wants CPU, memory, or I/O bottleneck evidence.
 - Python, Node, Java, Go, Rust, Docker, IDE, browser, simulator, local model, or language server usage may affect performance.
 - The user needs a shareable diagnostic report before changing settings or killing processes.
@@ -32,9 +32,7 @@ Read the matching reference before running commands:
 | --- | --- | --- |
 | macOS | `references/macos.md` | supported |
 | Windows | `references/windows.md` | supported |
-| Linux | future reference | not supported yet |
-
-If the host is Linux, say this skill currently only has macOS and Windows guidance and fall back to read-only basics unless the user asks to continue.
+| Linux | `references/linux.md` | supported |
 
 ## Workflow
 
@@ -51,12 +49,15 @@ If the host is Linux, say this skill currently only has macOS and Windows guidan
 | --- | --- | --- |
 | macOS Memory Pressure green and swap not growing, or Windows Pages Output/sec near zero and commit pressure normal | memory is not the bottleneck | benchmark and profile code |
 | macOS Memory Pressure yellow/red with swap growth, or Windows Available MBytes low with high commit pressure and Pages Output/sec | memory bottleneck | reduce high RSS/Private Bytes processes or workload peak memory |
+| Linux MemAvailable healthy, `vmstat si/so` zero, and PSI low | memory is not the bottleneck | benchmark and profile code |
+| Linux MemAvailable low with sustained `so`/`pswpout`, major faults, or memory PSI | memory bottleneck | reduce high RSS/PSS/USS processes, batch size, workers, or container limits |
 | CPU idle near zero and load above logical CPUs | CPU saturation | sample/profile the hot process |
 | CPU high but throughput low, machine hot | thermal or power limit possible | inspect macOS `powermetrics` or Windows `powercfg` evidence |
 | Disk writes high with swap growth | memory pressure causing I/O | fix memory pressure first |
 | Disk writes high without swap | build/cache/index/sync I/O | identify writer before cleanup |
 | Apple Silicon running x86_64 tools | Rosetta overhead possible | install arm64 or universal runtime |
 | Windows `vmmem`/`VmmemWSL` or Docker dominates memory | VM/container pressure | inspect WSL/Docker limits before killing random processes |
+| Linux cgroup `memory.events` shows `high`, `oom`, or `oom_kill` | container/service limit pressure | inspect cgroup and Docker/systemd limits before changing host settings |
 | Profiler shows one hot function/allocation site | code bottleneck | optimize that site, then re-benchmark |
 
 ## Reporting
