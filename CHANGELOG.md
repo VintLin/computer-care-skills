@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `diagnose-computer` for macOS performance and code-speed diagnostics, with macOS reference commands for memory pressure, process usage, runtime architecture, benchmarking, and profiling.
+
 ## v0.0.3 - 2026-06-15
 
 - Renamed `macos-clean-storage` to `clean-storage`.
