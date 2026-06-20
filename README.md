@@ -4,27 +4,14 @@
 
 共同原则：先诊断，再建议；先做只读检查，再执行可回滚的最小变更。涉及删除文件、修改系统设置、终止进程、网络配置或常驻自动化时，默认先说明范围、风险、回滚方式和验证方法。
 
-## 金字塔结构
+## Skills 结构
 
 ```
-                     ┌─────────────────────────────────┐
-                     │        Computer Care             │
-                     └─────────────────────────────────┘
-                                    │
-          ┌─────────────────────────┼─────────────────────────┐
-          │                         │                         │
-    ┌─────┴─────┐            ┌──────┴──────┐           ┌─────┴─────┐
-    │  诊断与修复  │            │  清理与维护   │           │ 监控与自动化 │
-    └─────┬─────┘            └──────┬──────┘           └─────┬─────┘
-          │                         │                         │
-   ┌──────┼──────┐           ┌──────┼──────┐           ┌──────┼──────┐
-computer network  permissions storage  path   desktop   processes folder
--health  -optimize -fix      -clean  -convert -tune    -monitor  -watch
-
-                     ┌─────────────────────────────────┐
-                     │      Codex 自维护               │
-                     │      codex-optimize             │
-                     └─────────────────────────────────┘
+Computer Care
+├─ 诊断与修复   ─── computer-health    network-optimize    permissions-fix
+├─ 清理与维护   ─── storage-clean      path-convert        desktop-tune
+├─ 监控与自动化 ─── processes-monitor  folder-watch
+└─ Codex 自维护 ─── codex-optimize
 ```
 
 ## 安装
