@@ -1,25 +1,13 @@
 ---
-name: monitor-processes
-description: Use when supervising long-running local commands, background processes, scripts, services, downloads, builds, or automation jobs that may hang, timeout, crash, lose logs, or need heartbeat-based liveness checks.
+name: processes-monitor
+description: Use when monitoring long-running local commands with heartbeat liveness checks — background jobs, builds, scripts, services, downloads, or batch automation that may hang, timeout, crash, or lose logs.
 ---
 
-# Monitor Processes
+# Processes Monitor
 
 ## Overview
 
 Monitor long-running work with explicit status files, heartbeats, logs, and timeouts. A PID alone proves a process exists; it does not prove progress.
-
-## When to Use
-
-Use for:
-
-- Commands expected to run longer than a short interactive task
-- Background jobs that need success/failure evidence
-- Scripts that may hang while keeping a PID alive
-- Local service health checks and restart decisions
-- Batch work where each item needs logs and exit status
-
-Do not use for interactive shells, editors, password prompts, or commands that require live stdin.
 
 ## Sentinel Pattern
 
@@ -54,14 +42,16 @@ else
 fi
 ```
 
+Always write a final status — never leave monitor files in an ambiguous state. The `trap` ensures the heartbeat loop is cleaned up on exit.
+
 ## Monitor Logic
 
 Check in a loop:
 
 1. If `.status` exists, read it and stop.
-2. If `.heartbeat` is stale beyond the threshold, treat as hung.
-3. If elapsed time exceeds the timeout, stop or escalate.
-4. Otherwise wait and check again.
+2. If `.heartbeat` is stale beyond the threshold, treat as hung. Do not kill a process only because it is slow — compare heartbeat age, log output, and elapsed time before deciding.
+3. If elapsed time exceeds the timeout, stop or escalate. Do not restart a failing process repeatedly without reading its log first.
+4. Otherwise wait and check again. Avoid `tail -f | grep -m1` for log watching — it can hang on macOS due to buffering. Prefer polling the status file.
 
 Recommended defaults:
 
@@ -71,10 +61,3 @@ Recommended defaults:
 | stale threshold | 60 seconds |
 | poll interval | 10-15 seconds |
 | max timeout | based on task, declared before start |
-
-## Common Mistakes
-
-- Do not rely on `tail -f | grep -m1`; it can hang on macOS due to buffering.
-- Do not kill a process only because it is slow; compare heartbeat, logs, and timeout.
-- Do not restart a failing process repeatedly without reading the log.
-- Do not leave monitor files in ambiguous states; write a final status.

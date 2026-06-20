@@ -1,19 +1,19 @@
 ---
-name: optimize-network
-description: Use when a user reports slow internet, unstable latency, packet loss, DNS delays, Wi-Fi or Ethernet issues, poor speedtest results, MTU/path-MTU problems, loaded latency, browser-only or terminal-only slowness, IPv4/IPv6 differences, background bandwidth contention, stale saved networks, mDNS/Bonjour/LLMNR noise, VPN-on networking, proxy/PAC/TUN overlap, or Clash/V2Ray/Xray/Mihomo routing conflicts on macOS, Windows, or Linux.
+name: network-optimize
+description: Use to establish a baseline when a user reports slow internet, unstable latency, packet loss, DNS delays, Wi-Fi or Ethernet issues, poor speedtest results, MTU/path-MTU problems, loaded latency, browser-only or terminal-only slowness, IPv4/IPv6 differences, background bandwidth contention, stale saved networks, mDNS/Bonjour/LLMNR noise, VPN-on networking, proxy/PAC/TUN overlap, or Clash/V2Ray/Xray/Mihomo routing conflicts on macOS, Windows, or Linux.
 ---
 
-# Optimize Network
+# Network Optimize
 
 ## Overview
 
-Prefer reversible, minimal changes. Start with read-only diagnosis, then explain each meaningful decision with conclusion, reason, risk, next step, scope, and validation. Do not ask the user to pause, quit, or disable Clash/V2Ray/Xray/Mihomo, WireGuard, Tailscale, corporate VPN, or similar always-on VPN/proxy apps as a default diagnostic step; users often rely on them for basic network access. Do not disable VPN, delete saved networks, change registry/system services, change TCP/NIC globals, disable IPv6/firewall/security tools, or kill processes unless the user explicitly asks and the impact is clearly bounded.
+Establish a read-only baseline before any change. Prefer reversible, minimal changes. Explain each meaningful decision with conclusion, reason, risk, next step, scope, and validation.
 
-Do not optimize from a single speed number. Compare repeated measurements, separate direct/proxy/VPN paths when that can be done without breaking the user's required access path, and avoid running bandwidth tests in parallel unless intentionally testing congestion or loaded latency.
+Never ask the user to disable their VPN/proxy as a first step — preserve the required access path. Do not optimize from a single speed number.
 
 ## Workflow
 
-1. Classify the symptom first: web first-load, bulk download, video call, gaming, SSH, Git/npm/pip/Docker, AI API, LAN/NAS, browser-only, terminal-only, VPN-only, or all traffic.
+1. Classify the symptom: web first-load, bulk download, video call, gaming, SSH, Git/npm/pip/Docker, AI API, LAN/NAS, browser-only, terminal-only, VPN-only, or all traffic.
 2. Identify OS, active interface, default route, DNS, proxy/PAC, VPN/TUN state, IPv4/IPv6 state, browser path, and available tools.
 3. Run a read-only baseline: responsiveness and loaded latency, bandwidth, DNS transport and answer quality, packet loss, MTU/path-MTU, Wi-Fi/Ethernet link quality, curl timing, route/path, and active bandwidth consumers.
 4. Compare paths when relevant:
@@ -37,16 +37,18 @@ Do not optimize from a single speed number. Compare repeated measurements, separ
 
 Read only the relevant reference:
 
-- Common baseline and safety: `references/common-baseline.md`
-- macOS: `references/macos.md`
-- Windows: `references/windows.md`
-- Linux: `references/linux.md`
-- Browser/app layer: `references/browser-app-layer.md`
-- DNS, DoH, and split DNS: `references/dns-doh-splitdns.md`
-- PMTU and MTU: `references/pmtu-mtu.md`
-- TCP and NIC diagnosis: `references/tcp-nic.md`
-- Router SQM and bufferbloat: `references/router-sqm-bufferbloat.md`
-- VPN/proxy overlap: `references/vpn-proxy.md`
+| Reference | Topic |
+| --- | --- |
+| `references/common-baseline.md` | Common baseline and safety |
+| `references/macos.md` | macOS |
+| `references/windows.md` | Windows |
+| `references/linux.md` | Linux |
+| `references/browser-app-layer.md` | Browser/app layer |
+| `references/dns-doh-splitdns.md` | DNS, DoH, and split DNS |
+| `references/pmtu-mtu.md` | PMTU and MTU |
+| `references/tcp-nic.md` | TCP and NIC diagnosis |
+| `references/router-sqm-bufferbloat.md` | Router SQM and bufferbloat |
+| `references/vpn-proxy.md` | VPN/proxy overlap |
 
 Use this routing table when the symptom already points to a specific layer:
 
@@ -67,13 +69,13 @@ Use scripts as read-only diagnostic helpers:
 - Windows PowerShell: `scripts/windows_network_snapshot.ps1`
 - Linux: `scripts/linux_network_snapshot.sh`
 
-Scripts are intentionally read-only. They collect state and do not change DNS, MTU, proxy, routes, VPN, firewall, TCP, or NIC settings.
+Scripts collect state only; they do not change DNS, MTU, proxy, routes, VPN, firewall, TCP, or NIC settings.
 
 `scripts/macos_network_snapshot.sh` runs `networkQuality` by default, which uses Internet data. Set `SKIP_BANDWIDTH=1` to skip that section when data usage, metered links, or active calls matter.
 
 ## Decision Heuristics
 
-- Treat loaded latency/responsiveness as a first-class metric, not a footnote to bandwidth. If idle latency is normal but latency spikes during upload/download, classify loaded-latency or bufferbloat before changing DNS.
+- Treat loaded latency/responsiveness as a first-class metric. If idle latency is normal but latency spikes during upload/download, classify loaded-latency or bufferbloat before changing DNS.
 - If DNS query time is fast but TCP, TLS, TTFB, or total HTTP time is high, do not over-optimize DNS.
 - If DNS is fast but CDN IP or TTFB is poor, compare A, AAAA, HTTPS/SVCB answers, browser Secure DNS state, and curl `remote_ip` across resolvers.
 - If IPv4 and IPv6 behave differently, treat it as Happy Eyeballs, dual-stack routing, DNS answer quality, PMTU, VPN/TUN, firewall, or CDN behavior before disabling IPv6 globally.
@@ -99,6 +101,8 @@ Use this order unless evidence points elsewhere:
 3. High-risk system configuration: TCP globals, Windows registry/adapter advanced properties, Linux offload/ring/coalescing, firewall, IPv6 disablement, system services. Do not do this by default.
 4. Network device configuration: router SQM/CAKE, channel width, WPA mode, firmware, AP backhaul, flow offload. Require user authority over the device.
 
+## Safety Rules
+
 Do not recommend these as first-line fixes:
 
 - Disable IPv6 globally.
@@ -121,7 +125,7 @@ Do not recommend these as first-line fixes:
 - Avoid duplicate VPN/TUN/proxy ownership while preserving the path the user needs.
 - Recommend VPN node/protocol changes if system, link, DNS, and route baselines are already clean.
 
-## Reporting Format
+## Reporting
 
 For each meaningful decision, report:
 
